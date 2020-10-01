@@ -15,8 +15,6 @@ class CPU:
         # internal registers
         self.PC = 0
         self.IR = None
-        self.MAR = None
-        self.MDR = None
         self.FL = None
 
     def load(self):
@@ -77,10 +75,10 @@ class CPU:
         """Run the CPU."""
         pass
 
-    def ram_read(self, read_address):
+    def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
-        pass
+        return self.ram[MAR]
 
-    def ram_write(self, value, write_address):
+    def ram_write(self, MDR, address):
         """should accept the value to write, and the address to write to"""
-        pass
+        self.ram[address] = MDR
