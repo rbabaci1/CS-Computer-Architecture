@@ -84,28 +84,25 @@ class CPU:
         LDI, PRN, HALT, running = 0b0010, 0b0111, 0b0001, True
 
         while running:
-            IR = self.ram_read(self.PC)
-            identifier = (1 << 4) - 1 & IR
-            num_operands = IR >> 6
+            IR = self.ram_read(self.PC)  # instruction register
+            II = (1 << 4) - 1 & IR  # instruction identifier
+            num_operands = IR >> 6  # the number of bytes the instruction has
             # isALU = self.isKthBitSet(IR, 6)
             # setsPC = self.isKthBitSet(IR, 5)
-            # opcode = self.getOpcodeHex(IR)
 
-            if identifier == LDI:  # LDI, set the specified register to a specific value
+            if II == LDI:  # LDI, set the specified register to a specific value
                 reg_num = self.ram_read(self.PC + 1)
                 value = self.ram_read(self.PC + 2)
                 self.registers[reg_num] = value
                 self.PC += num_operands + 1
                 print("LDI")
 
-            elif (
-                identifier == PRN
-            ):  # PRN, Print numeric value stored in a given register
+            elif II == PRN:  # PRN, Print numeric value stored in a given register
                 reg_num = self.ram_read(self.PC + 1)
                 print(f"R{reg_num} has value of {self.registers[reg_num]}.")
                 self.PC += num_operands + 1
 
-            elif identifier == HALT:  # HALT
+            elif II == HALT:  # HALT
                 running = False
                 print("HALT")
 
