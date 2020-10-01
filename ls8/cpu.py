@@ -25,12 +25,25 @@ class CPU:
         opcode = hex(opcode)
         return int(opcode[2:])
 
+    def validate_arguments(self, args):
+        if len(args) < 2:
+            print("\t*******************************************")
+            print(f"PLEASE SPECIFY THE FILE NAME TO LOAD AS THE SECOND ARGUMENT")
+            print("\t*******************************************")
+            sys.exit(1)
+        elif len(args) >= 2:
+            file_name = args[1]
+            if file_name[:9] != "examples/":
+                print("\t*******************************************")
+                print(f"\t   PLEASE SPECIFY THE CORRECT FOLDER NAME")
+                print("\t*******************************************")
+                sys.exit(1)
+
     def load(self):
         """Load a program into memory."""
 
         address = 0
-
-        # For now, we've just hardcoded a program:
+        self.validate_arguments(sys.argv)
 
         program = [
             # From print8.ls8
