@@ -17,6 +17,14 @@ class CPU:
         self.IR = None
         self.FL = None
 
+    def isKthBitSet(self, n, k):
+        if n & (1 << (k - 1)):
+            return True
+
+    def getOpcodeHex(self, opcode):
+        opcode = hex(opcode)
+        return int(opcode[2:])
+
     def load(self):
         """Load a program into memory."""
 
@@ -73,7 +81,21 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+
+        while running:
+            IR = self.ram_read(self.PC)
+            # identifier = (1 << 4) - 1 & IR
+            # num_operands = IR >> 6
+            # isALU = self.isKthBitSet(IR, 6)
+            # setsPC = self.isKthBitSet(IR, 5)
+            opcode = self.getOpcodeHex(IR)
+
+            if opcode == 82:  # set a specified register to a specific value
+                reg_num = self.getOpcodeHex(self.ram_read(self.PC + 1))
+                value = self.getOpcodeHex(self.ram_read(self.PC + 2))
+                self.registers[reg_num] = value
+                self.PC += 3
 
     def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
