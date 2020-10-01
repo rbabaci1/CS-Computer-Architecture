@@ -91,11 +91,21 @@ class CPU:
             # setsPC = self.isKthBitSet(IR, 5)
             opcode = self.getOpcodeHex(IR)
 
-            if opcode == 82:  # set a specified register to a specific value
+            if opcode == 82:  # LDI, set the specified register to a specific value
                 reg_num = self.getOpcodeHex(self.ram_read(self.PC + 1))
                 value = self.getOpcodeHex(self.ram_read(self.PC + 2))
                 self.registers[reg_num] = value
+                print("LDI")
                 self.PC += 3
+
+            elif opcode == 1:  # HALT
+                print("HALT")
+                running = False
+
+            elif opcode == 47:  # PRN, Print numeric value stored in a given register
+                reg_num = self.getOpcodeHex(self.ram_read(self.PC + 1))
+                print(f"Register-{reg_num}: {self.registers[reg_num]}.")
+                self.PC += 2
 
     def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
