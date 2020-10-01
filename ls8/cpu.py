@@ -81,7 +81,7 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        running = True
+        LDI, PRN, HALT, running = 0b10000010, 0b01000111, 0b00000001, True
 
         while running:
             IR = self.ram_read(self.PC)
@@ -89,23 +89,23 @@ class CPU:
             # num_operands = IR >> 6
             # isALU = self.isKthBitSet(IR, 6)
             # setsPC = self.isKthBitSet(IR, 5)
-            opcode = self.getOpcodeHex(IR)
+            # opcode = self.getOpcodeHex(IR)
 
-            if opcode == 82:  # LDI, set the specified register to a specific value
-                reg_num = self.getOpcodeHex(self.ram_read(self.PC + 1))
-                value = self.getOpcodeHex(self.ram_read(self.PC + 2))
+            if IR == LDI:  # LDI, set the specified register to a specific value
+                reg_num = self.ram_read(self.PC + 1)
+                value = self.ram_read(self.PC + 2)
                 self.registers[reg_num] = value
                 print("LDI")
                 self.PC += 3
 
-            elif opcode == 1:  # HALT
+            elif IR == PRN:  # PRN, Print numeric value stored in a given register
+                reg_num = self.ram_read(self.PC + 1)
+                print(f"R{reg_num} has value of {self.registers[reg_num]}.")
+                self.PC += 2
+
+            elif IR == HALT:  # HALT
                 print("HALT")
                 running = False
-
-            elif opcode == 47:  # PRN, Print numeric value stored in a given register
-                reg_num = self.getOpcodeHex(self.ram_read(self.PC + 1))
-                print(f"Register-{reg_num}: {self.registers[reg_num]}.")
-                self.PC += 2
 
     def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
