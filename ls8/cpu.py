@@ -12,6 +12,7 @@ class CPU:
         self.ram = [0] * 256
         # initialize 8 registers
         self.registers = [0] * 8
+
         # internal registers
         self.PC = 0
         self.IR = None
@@ -58,6 +59,8 @@ class CPU:
             lines = f.readlines()
 
         program = self.generate_values(lines)
+        print(program)
+        sys.exit(1)
 
         for instruction in program:
             self.ram[address] = instruction
