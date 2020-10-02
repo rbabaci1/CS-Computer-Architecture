@@ -38,22 +38,26 @@ class CPU:
                 print(f"\t   PLEASE SPECIFY THE CORRECT FOLDER NAME")
                 print("\t*******************************************")
                 sys.exit(1)
+        return args[1]
+
+    def generate_values(self, file_lines):
+        values = []
+        for l in file_lines:
+            binary_string = l.partition("#")[0].strip()
+            if len(binary_string):
+                values.append(int(binary_string, 2))
+        return values
 
     def load(self):
         """Load a program into memory."""
 
         address = 0
-        self.validate_arguments(sys.argv)
+        file_name = self.validate_arguments(sys.argv)
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
+        with open(file_name) as f:
+            lines = f.readlines()
+
+        program = self.generate_values(lines)
 
         for instruction in program:
             self.ram[address] = instruction
