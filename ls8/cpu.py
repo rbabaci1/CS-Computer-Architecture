@@ -12,7 +12,8 @@ class CPU:
         self.ram = [0] * 256
         # initialize 8 registers
         self.registers = [0] * 8
-
+        # set R7 to a hex value
+        self.registers[7] = 0xF4
         # internal registers
         self.PC = 0
         self.IR = None
