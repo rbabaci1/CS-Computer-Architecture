@@ -30,21 +30,21 @@ class CPU:
         return int(opcode[2:])
 
     def validate_arguments(self, args):
-        if len(args) < 2:
-            print("\t*******************************************")
-            print(f"PLEASE SPECIFY THE FILE NAME TO LOAD AS THE SECOND ARGUMENT")
-            print("\t*******************************************")
+        if len(args) != 2:
+            print(
+                f"*** PLEASE SPECIFY THE FILE NAME TO LOAD AS THE SECOND ARGUMENT ***"
+            )
             sys.exit(1)
-        elif len(args) >= 2:
-            file_name = args[1]
-            if file_name[:9] != "examples/":
-                print("\t*******************************************")
-                print(f"\t   PLEASE SPECIFY THE CORRECT FOLDER NAME")
-                print("\t*******************************************")
-                sys.exit(1)
         return args[1]
 
-    def generate_values(self, file_lines):
+    def generate_values(self, file_name):
+        try:
+            with open(f"examples/{file_name}") as f:
+                file_lines = f.readlines()
+        except FileNotFoundError:
+            print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
+            sys.exit(1)
+
         values = []
         for l in file_lines:
             binary_string = l.partition("#")[0].strip()
@@ -57,11 +57,7 @@ class CPU:
 
         address = 0
         file_name = self.validate_arguments(sys.argv)
-
-        with open(file_name) as f:
-            lines = f.readlines()
-
-        program = self.generate_values(lines)
+        program = self.generate_values(file_name)
 
         for instruction in program:
             self.ram[address] = instruction
