@@ -62,8 +62,6 @@ class CPU:
             lines = f.readlines()
 
         program = self.generate_values(lines)
-        print(program)
-        sys.exit(1)
 
         for instruction in program:
             self.ram[address] = instruction
@@ -106,7 +104,7 @@ class CPU:
         """Run the CPU."""
         LDI, PRN, HALT, running = 0b0010, 0b0111, 0b0001, True
 
-        while running:
+        while not self.halted:
             IR = self.ram_read(self.PC)  # instruction register
             II = (1 << 4) - 1 & IR  # instruction identifier
             num_operands = IR >> 6  # the number of bytes the instruction has
@@ -122,11 +120,11 @@ class CPU:
 
             elif II == PRN:  # PRN, Print numeric value stored in a given register
                 reg_num = self.ram_read(self.PC + 1)
-                print(f"R{reg_num} has value of {self.registers[reg_num]}.")
+                print(f"Register-{reg_num} has value of {self.registers[reg_num]}.")
                 self.PC += num_operands + 1
 
             elif II == HALT:  # HALT
-                running, self.halted = False, True
+                self.halted = True
                 print("HALT")
 
     def ram_read(self, MAR):
