@@ -10,18 +10,21 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        # initialize the ram with 256 bytes
-        self.ram = [0] * 256
-        # initialize 8 registers
-        self.registers = [0] * 8
-        # set R7 to a hex value
-        self.registers[7] = 0xF4
-        # CPU not halted yet
-        self.halted = False
+        self.ram = [0] * 256  # initialize the ram with 256 bytes
+        self.registers = [0] * 8  # initialize 8 registers
+        self.registers[7] = 0xF4  # set R7 to a hex value
+        self.halted = False  # CPU not halted yet
+        self.num_operands = 0  # number of operands in an instruction
         # internal registers
         self.PC = 0
         self.IR = None
         self.FL = None
+        self.branch_table = {  # a table to store the helpers for fast lookup
+            LDI: self.handle_LDI,
+            PRN: self.handle_PRN,
+            HALT: self.handle_HALT,
+            MUL: self.handle_MUL,
+        }
 
     def isKthBitSet(self, n, k):
         if n & (1 << (k - 1)):
@@ -100,6 +103,23 @@ class CPU:
 
         print()
 
+    def handle_LDI(self, *args):
+        reg_num, value = args[0], args[1]
+        self.registers[reg_num] = value
+        print("LDI")
+
+    def handle_PRN(self, *args):
+        reg_num = args[0]
+        print(f"Register-{reg_num} has value of {self.registers[reg_num]}.")
+
+    def handle_HALT(self, *args):
+        self.halted = True
+        print("HALT")
+
+    def handle_MUL(self, *args):
+        reg_a, reg_b = args[0], args[1]
+        self.alu("MUL", reg_a, reg_b)
+
     def run(self):
         """Run the CPU."""
 
@@ -108,33 +128,17 @@ class CPU:
             # setsPC = self.isKthBitSet(IR, 5)
             IR = self.ram_read(self.PC)  # instruction register
             # II = (1 << 4) - 1 & IR  # instruction identifier
-            num_operands = IR >> 6  # the number of bytes the instruction has
+            self.num_operands = (IR >> 6) + 1  # the number of bytes the instruction has
+            operand_a = self.ram_read(self.PC + 1)
+            operand_b = self.ram_read(self.PC + 2)
 
-            if IR == LDI:  # LDI, set the specified register to a specific value
-                reg_num, value = self.ram_read(self.PC + 1), self.ram_read(self.PC + 2)
-                self.registers[reg_num] = value
-                self.PC += num_operands + 1
-                print("LDI")
-
-            elif IR == PRN:  # PRN, Print numeric value stored in a given register
-                reg_num = self.ram_read(self.PC + 1)
-                print(f"Register-{reg_num} has value of {self.registers[reg_num]}.")
-                self.PC += num_operands + 1
-
-            elif IR == HALT:  # HALT
-                self.halted = True
-                print("HALT")
-
-            elif IR == MUL:  # MUL
-                operand_a = self.ram_read(self.PC + 1)
-                operand_b = self.ram_read(self.PC + 2)
-                self.alu("MUL", operand_a, operand_b)
-                self.PC += num_operands + 1
-                print("MUL")
+            self.branch_table[IR](operand_a, operand_b)
+            self.PC += self.num_operands
 
     def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
-        return self.ram[MAR]
+        if MAR < len(self.ram):
+            return self.ram[MAR]
 
     def ram_write(self, MDR, address):
         """should accept the value to write, and the address to write to"""
