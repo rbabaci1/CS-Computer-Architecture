@@ -14,6 +14,8 @@ class CPU:
         self.registers = [0] * 8
         # set R7 to a hex value
         self.registers[7] = 0xF4
+        # CPU not halted yet
+        self.halted = False
         # internal registers
         self.PC = 0
         self.IR = None
@@ -124,7 +126,7 @@ class CPU:
                 self.PC += num_operands + 1
 
             elif II == HALT:  # HALT
-                running = False
+                running, self.halted = False, True
                 print("HALT")
 
     def ram_read(self, MAR):
