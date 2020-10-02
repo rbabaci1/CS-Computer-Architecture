@@ -14,7 +14,6 @@ class CPU:
         self.registers = [0] * 8  # initialize 8 registers
         self.registers[7] = 0xF4  # set R7 to a hex value
         self.halted = False  # CPU not halted yet
-        self.num_operands = 0  # number of operands in an instruction
         # internal registers
         self.PC = 0
         self.IR = None
@@ -128,12 +127,12 @@ class CPU:
             # setsPC = self.isKthBitSet(IR, 5)
             IR = self.ram_read(self.PC)  # instruction register
             # II = (1 << 4) - 1 & IR  # instruction identifier
-            self.num_operands = (IR >> 6) + 1  # the number of bytes the instruction has
+            num_operands = (IR >> 6) + 1  # the number of bytes the instruction has
             operand_a = self.ram_read(self.PC + 1)
             operand_b = self.ram_read(self.PC + 2)
 
             self.branch_table[IR](operand_a, operand_b)
-            self.PC += self.num_operands
+            self.PC += num_operands
 
     def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
