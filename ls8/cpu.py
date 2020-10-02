@@ -2,6 +2,8 @@
 
 import sys
 
+LDI, PRN, HALT, MUL = 0b10000010, 0b01000111, 0b00000001, 0b10100010
+
 
 class CPU:
     """Main CPU class."""
@@ -67,8 +69,10 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
+            self.registers[reg_a] += self.registers[reg_b]
+        elif op == "MUL":
+            result = self.registers[reg_a] * self.registers[reg_b]
+            self.registers[reg_a] = result
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -98,30 +102,35 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        LDI, PRN, HALT, running = 0b0010, 0b0111, 0b0001, True
 
         while not self.halted:
-            IR = self.ram_read(self.PC)  # instruction register
-            II = (1 << 4) - 1 & IR  # instruction identifier
-            num_operands = IR >> 6  # the number of bytes the instruction has
             # isALU = self.isKthBitSet(IR, 6)
             # setsPC = self.isKthBitSet(IR, 5)
+            IR = self.ram_read(self.PC)  # instruction register
+            # II = (1 << 4) - 1 & IR  # instruction identifier
+            num_operands = IR >> 6  # the number of bytes the instruction has
 
-            if II == LDI:  # LDI, set the specified register to a specific value
-                reg_num = self.ram_read(self.PC + 1)
-                value = self.ram_read(self.PC + 2)
+            if IR == LDI:  # LDI, set the specified register to a specific value
+                reg_num, value = self.ram_read(self.PC + 1), self.ram_read(self.PC + 2)
                 self.registers[reg_num] = value
                 self.PC += num_operands + 1
                 print("LDI")
 
-            elif II == PRN:  # PRN, Print numeric value stored in a given register
+            elif IR == PRN:  # PRN, Print numeric value stored in a given register
                 reg_num = self.ram_read(self.PC + 1)
                 print(f"Register-{reg_num} has value of {self.registers[reg_num]}.")
                 self.PC += num_operands + 1
 
-            elif II == HALT:  # HALT
+            elif IR == HALT:  # HALT
                 self.halted = True
                 print("HALT")
+
+            elif IR == MUL:  # MUL
+                operand_a = self.ram_read(self.PC + 1)
+                operand_b = self.ram_read(self.PC + 2)
+                self.alu("MUL", operand_a, operand_b)
+                self.PC += num_operands + 1
+                print("MUL")
 
     def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
