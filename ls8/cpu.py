@@ -126,7 +126,6 @@ class CPU:
             # isALU = self.isKthBitSet(IR, 6)
             # setsPC = self.isKthBitSet(IR, 5)
             IR = self.ram_read(self.PC)  # instruction register
-            # II = (1 << 4) - 1 & IR  # instruction identifier
             num_operands = (IR >> 6) + 1  # the number of bytes the instruction has
             operand_a = self.ram_read(self.PC + 1)
             operand_b = self.ram_read(self.PC + 2)
