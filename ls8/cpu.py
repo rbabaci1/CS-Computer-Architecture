@@ -2,7 +2,7 @@
 
 import sys
 
-LDI, PRN, HALT, MUL = 0b10000010, 0b01000111, 0b00000001, 0b10100010
+LDI, PRN, HALT, MUL, PUSH, POP = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b01000101, 0b01000110
 
 
 class CPU:
@@ -14,8 +14,10 @@ class CPU:
         self.registers = [0] * 8  # initialize 8 registers
         self.registers[7] = 0xF4  # set R7 to a hex value
         self.halted = False  # CPU not halted yet
+        self.address = 0
         # internal registers
         self.PC = 0
+        self.SP = 7  # stack pointer
         self.IR = None
         self.FL = None
         self.branch_table = {  # a table to store the helpers for fast lookup
@@ -23,6 +25,7 @@ class CPU:
             PRN: self.handle_PRN,
             HALT: self.handle_HALT,
             MUL: self.handle_MUL,
+            PUSH: self.handle_PUSH
         }
 
     def isKthBitSet(self, n, k):
@@ -44,21 +47,30 @@ class CPU:
     def load_memory(self, file_name):
         try:
             with open(f"examples/{file_name}") as fp:
-                address = 0
                 for l in fp:
                     binary_string = l.partition("#")[0].strip()
                     if len(binary_string):
-                        self.ram_write(int(binary_string, 2), address)
-                        address += 1
+                        self.ram_write(int(binary_string, 2), self.address)
+                        self.address += 1
         except FileNotFoundError:
             print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
             sys.exit(1)
+
+    # def allocate_stack(self):
+    #     space_for_stack, end = 256 - self.address, len(self.ram) - 1
+
+    #     while space_for_stack:
+    #         self.ram[end] = 1
+    #         end -= 1
+    #         space_for_stack -= 1
 
     def load(self):
         """Load a program into memory."""
 
         file_name = self.validate_arguments(sys.argv)
         self.load_memory(file_name)
+
+        # self.allocate_stack()
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -111,6 +123,14 @@ class CPU:
     def handle_MUL(self, *args):
         reg_a, reg_b = args[0], args[1]
         self.alu("MUL", reg_a, reg_b)
+
+    def handle_PUSH(self, *args):
+        # stack starts at last memory index
+        self.registers[self.SP] = len(self.ram) - 1
+        valueToPush = self.registers[args[0]]
+        self.ram_write(valueToPush, self.registers[self.SP])
+        self.registers[self.SP] -= 1
+        print("PUSH")
 
     def run(self):
         """Run the CPU."""
