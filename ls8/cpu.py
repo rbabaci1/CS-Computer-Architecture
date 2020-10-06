@@ -41,31 +41,23 @@ class CPU:
             sys.exit(1)
         return args[1]
 
-    def generate_values(self, file_name):
+    def load_memory(self, file_name, address=0):
         try:
-            with open(f"examples/{file_name}") as f:
-                file_lines = f.readlines()
+            with open(f"examples/{file_name}") as fp:
+                for l in fp:
+                    binary_string = l.partition("#")[0].strip()
+                    if len(binary_string):
+                        self.ram_write(int(binary_string, 2), address)
+                        address += 1
         except FileNotFoundError:
             print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
             sys.exit(1)
 
-        values = []
-        for l in file_lines:
-            binary_string = l.partition("#")[0].strip()
-            if len(binary_string):
-                values.append(int(binary_string, 2))
-        return values
-
     def load(self):
         """Load a program into memory."""
 
-        address = 0
         file_name = self.validate_arguments(sys.argv)
-        program = self.generate_values(file_name)
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        self.load_memory(file_name)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -126,7 +118,8 @@ class CPU:
             # isALU = self.isKthBitSet(IR, 6)
             # setsPC = self.isKthBitSet(IR, 5)
             IR = self.ram_read(self.PC)  # instruction register
-            num_operands = (IR >> 6) + 1  # the number of bytes the instruction has
+            # the number of bytes the instruction has
+            num_operands = (IR >> 6) + 1
             operand_a = self.ram_read(self.PC + 1)
             operand_b = self.ram_read(self.PC + 2)
 
