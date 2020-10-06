@@ -2,7 +2,7 @@
 
 import sys
 
-LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000
 
 
 class CPU:
@@ -30,7 +30,8 @@ class CPU:
             PUSH: self.handle_PUSH,
             POP: self.handle_POP,
             JMP: self.handle_JMP,
-            ST: self.handle_ST
+            ST: self.handle_ST,
+            PRA: self.handle_PRA
         }
 
     def isKthBitSet(self, n, k):
@@ -128,6 +129,9 @@ class CPU:
         value_to_store = self.registers[args[1]]
         address_to_store_at = self.registers[args[0]]
         self.ram_write(value_to_store, address_to_store_at)
+
+    def handle_PRA(self, *args):
+        print(chr(self.registers[args[0]]))
 
     def run(self):
         """Run the CPU."""
