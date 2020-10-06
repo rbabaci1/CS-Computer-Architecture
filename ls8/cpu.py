@@ -28,7 +28,8 @@ class CPU:
             MUL: self.handle_MUL,
             ADD: self.handle_ADD,
             PUSH: self.handle_PUSH,
-            POP: self.handle_POP
+            POP: self.handle_POP,
+            JMP: self.handle_JMP
         }
 
     def isKthBitSet(self, n, k):
@@ -118,12 +119,17 @@ class CPU:
         self.registers[reg_to_store_in] = value_to_store
         self.registers[self.SP] += 1
 
+    def handle_JMP(self, *args):
+        reg_to_jump_to = self.registers[args[0]]
+        self.PC = reg_to_jump_to
+
     def run(self):
         """Run the CPU."""
 
         while not self.halted:
-            # isALU = self.isKthBitSet(IR, 6)
-            # setsPC = self.isKthBitSet(IR, 5)
+            if self.address == self.registers[self.SP]:
+                print("*** IT'S TIME TO EXIT, THE STACK IS ABOUT TO OVER FLOW ***")
+                return
             IR = self.ram_read(self.PC)  # instruction register
             # the number of bytes the instruction has
             num_operands = (IR >> 6) + 1
