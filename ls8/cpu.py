@@ -2,7 +2,7 @@
 
 import sys
 
-LDI, PRN, HALT, MUL, PUSH, POP = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b01000101, 0b01000110
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100
 
 
 class CPU:
@@ -26,6 +26,7 @@ class CPU:
             PRN: self.handle_PRN,
             HALT: self.handle_HALT,
             MUL: self.handle_MUL,
+            ADD: self.handle_ADD,
             PUSH: self.handle_PUSH,
             POP: self.handle_POP
         }
@@ -50,8 +51,7 @@ class CPU:
         if op == "ADD":
             self.registers[reg_a] += self.registers[reg_b]
         elif op == "MUL":
-            result = self.registers[reg_a] * self.registers[reg_b]
-            self.registers[reg_a] = result
+            self.registers[reg_a] *= self.registers[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -97,6 +97,10 @@ class CPU:
     def handle_MUL(self, *args):
         reg_a, reg_b = args[0], args[1]
         self.alu("MUL", reg_a, reg_b)
+
+    def handle_ADD(self, *args):
+        reg_a, reg_b = args[0], args[1]
+        self.alu("ADD", reg_a, reg_b)
 
     def handle_PUSH(self, *args):
         # stack starts at last memory index
