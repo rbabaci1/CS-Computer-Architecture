@@ -41,9 +41,10 @@ class CPU:
             sys.exit(1)
         return args[1]
 
-    def load_memory(self, file_name, address=0):
+    def load_memory(self, file_name):
         try:
             with open(f"examples/{file_name}") as fp:
+                address = 0
                 for l in fp:
                     binary_string = l.partition("#")[0].strip()
                     if len(binary_string):
