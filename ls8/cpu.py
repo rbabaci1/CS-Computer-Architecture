@@ -25,7 +25,8 @@ class CPU:
             PRN: self.handle_PRN,
             HALT: self.handle_HALT,
             MUL: self.handle_MUL,
-            PUSH: self.handle_PUSH
+            PUSH: self.handle_PUSH,
+            POP: self.handle_POP
         }
 
     def isKthBitSet(self, n, k):
@@ -131,6 +132,13 @@ class CPU:
         self.ram_write(valueToPush, self.registers[self.SP])
         self.registers[self.SP] -= 1
         print("PUSH")
+
+    def handle_POP(self, *args):
+        reg_to_store_at = args[0]
+        value_to_store = self.ram_read(self.registers[self.SP])
+        self.registers[reg_to_store_at] = value_to_store
+        self.registers[self.SP] += 1
+        print("POP")
 
     def run(self):
         """Run the CPU."""
