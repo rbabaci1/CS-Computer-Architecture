@@ -38,31 +38,11 @@ class CPU:
         opcode = hex(opcode)
         return int(opcode[2:])
 
-    def validate_arguments(self, args):
-        if len(args) != 2:
-            print(
-                f"*** PLEASE SPECIFY THE FILE NAME TO LOAD AS THE SECOND ARGUMENT ***"
-            )
-            sys.exit(1)
-        return args[1]
-
-    def load_memory(self, file_name):
-        try:
-            with open(f"examples/{file_name}") as fp:
-                for l in fp:
-                    binary_string = l.partition("#")[0].strip()
-                    if len(binary_string):
-                        self.ram_write(int(binary_string, 2), self.address)
-                        self.address += 1
-        except FileNotFoundError:
-            print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
-            sys.exit(1)
-
-    def load(self):
+    def load(self, program):
         """Load a program into memory."""
-
-        file_name = self.validate_arguments(sys.argv)
-        self.load_memory(file_name)
+        for instruction in program:
+            self.ram_write(instruction, self.address)
+            self.address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
