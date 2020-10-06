@@ -15,6 +15,7 @@ class CPU:
         self.registers[7] = 0xF4  # set R7 to a hex value
         self.halted = False  # CPU not halted yet
         self.address = 0
+        self.stack_is_empty = True
         # internal registers
         self.PC = 0
         self.SP = 7  # stack pointer
@@ -57,21 +58,11 @@ class CPU:
             print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
             sys.exit(1)
 
-    # def allocate_stack(self):
-    #     space_for_stack, end = 256 - self.address, len(self.ram) - 1
-
-    #     while space_for_stack:
-    #         self.ram[end] = 1
-    #         end -= 1
-    #         space_for_stack -= 1
-
     def load(self):
         """Load a program into memory."""
 
         file_name = self.validate_arguments(sys.argv)
         self.load_memory(file_name)
-
-        # self.allocate_stack()
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -111,15 +102,17 @@ class CPU:
     def handle_LDI(self, *args):
         reg_num, value = args[0], args[1]
         self.registers[reg_num] = value
-        print("LDI")
+        # print("LDI")
 
     def handle_PRN(self, *args):
         reg_num = args[0]
-        print(f"Register-{reg_num} has value of {self.registers[reg_num]}.")
+        print(" -------------------")
+        print(f"| Register_{reg_num} |   {self.registers[reg_num]}  |")
+        print(" -------------------")
 
     def handle_HALT(self, *args):
         self.halted = True
-        print("HALT")
+        # print("HALT")
 
     def handle_MUL(self, *args):
         reg_a, reg_b = args[0], args[1]
@@ -127,18 +120,19 @@ class CPU:
 
     def handle_PUSH(self, *args):
         # stack starts at last memory index
-        self.registers[self.SP] = len(self.ram) - 1
+        if self.stack_is_empty:
+            self.registers[self.SP] = len(self.ram)
+            self.stack_is_empty = False
+
+        self.registers[self.SP] -= 1
         valueToPush = self.registers[args[0]]
         self.ram_write(valueToPush, self.registers[self.SP])
-        self.registers[self.SP] -= 1
-        print("PUSH")
 
     def handle_POP(self, *args):
-        reg_to_store_at = args[0]
+        reg_to_store_in = args[0]
         value_to_store = self.ram_read(self.registers[self.SP])
-        self.registers[reg_to_store_at] = value_to_store
+        self.registers[reg_to_store_in] = value_to_store
         self.registers[self.SP] += 1
-        print("POP")
 
     def run(self):
         """Run the CPU."""
