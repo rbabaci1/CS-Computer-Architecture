@@ -1,3 +1,6 @@
+
+import sys
+
 # CPU instructions binary value
 LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011
 
@@ -47,6 +50,10 @@ def handle_PUSH(self, *args):
 
 
 def handle_POP(self, *args):
+    if self.registers[self.SP] == 0xF4:
+        print("\n*** THE STACK IS EMPTY. EXITING TO AVOID UNDERFLOWING ***\n")
+        sys.exit(1)
+
     reg_to_store_in, num_operands = args[0], args[2]
     value_to_store = self.ram_read(self.registers[self.SP])
     self.registers[reg_to_store_in] = value_to_store

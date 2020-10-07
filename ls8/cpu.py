@@ -120,7 +120,7 @@ class CPU:
                         break
 
             elif self.address == self.registers[self.SP]:
-                print("*** IT'S TIME TO EXIT, THE STACK IS ABOUT TO OVER FLOW ***")
+                print("\n*** THE STACK IS FULL. EXITING TO AVOID OVERFLOWING ***\n")
                 return
 
             else:   # keep executing instructions as usual
