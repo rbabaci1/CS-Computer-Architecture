@@ -114,7 +114,6 @@ class CPU:
                 self.registers[self.IS] |= 1  # set bit 0 in the IS
                 self.interrupts_enabled = True
                 start_time = time.time()
-                print(self.ram)
 
             if self.interrupts_enabled:
                 masked_interrupts = self.registers[self.IM] & self.registers[self.IS]
