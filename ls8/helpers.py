@@ -1,4 +1,5 @@
 import time
+import sys
 
 
 def handle_LDI(self, *args):
@@ -17,8 +18,8 @@ def handle_PRN(self, *args):
 
 def handle_HALT(self, *args):
     self.halted, num_operands = True, args[2]
-    print("HALT")
     self.PC += num_operands
+    print("HALT")
 
 
 def handle_MUL(self, *args):
@@ -67,7 +68,10 @@ def handle_ST(self, *args):
 
 def handle_PRA(self, *args):
     num_operands = args[2]
-    print(chr(self.registers[args[0]]))
+    value = self.registers[args[0]]
+
+    print(chr(value)) if value != 0 else None
+
     self.PC += num_operands
 
 
@@ -82,3 +86,11 @@ def handle_IRET(self, *args):
     self.registers = s_registers + self.registers[6:]
     self.FL = s_FL
     self.PC = s_PC
+
+
+def handle_LD(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    value_to_load = self.ram_read(self.registers[reg_b])
+    self.registers[reg_a] = value_to_load
+
+    self.PC += num_operands

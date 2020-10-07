@@ -2,10 +2,11 @@
 
 import sys
 import time
-import threading
-from helpers import handle_HALT, handle_ADD, handle_LDI, handle_POP, handle_MUL, handle_JMP, handle_PUSH, handle_PRN, handle_PRA, handle_ST, handle_IRET
+import keyboard
+import unicodedata
+from helpers import handle_HALT, handle_ADD, handle_LDI, handle_POP, handle_MUL, handle_JMP, handle_PUSH, handle_PRN, handle_PRA, handle_ST, handle_IRET, handle_LD
 
-LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011
 
 
 class CPU:
@@ -39,7 +40,8 @@ class CPU:
             JMP: handle_JMP,
             ST: handle_ST,
             PRA: handle_PRA,
-            IRET: handle_IRET
+            IRET: handle_IRET,
+            LD: handle_LD
         }
 
     def load(self, program):
@@ -91,8 +93,8 @@ class CPU:
         """should accept the value to write, and the address to write to"""
         self.ram[address] = MDR
 
-    def clear_bit(self):
-        mask = 1 << 0
+    def clear_bit(self, position):
+        mask = 1 << position
         self.registers[self.IS] &= ~mask
 
     def stack_cpu_state(self):
@@ -104,16 +106,32 @@ class CPU:
             self.registers[self.SP] -= 1
             self.ram_write(i, self.registers[self.SP])
 
+    def run_timer_interrupt(self):
+        self.registers[self.IS] |= 1  # set bit 0 in the IS
+        self.interrupts_enabled = True
+
+    def run_keyboard_interrupt(self, e):
+        self.registers[self.IS] |= 2
+        self.interrupts_enabled = True
+
+        try:
+            self.ram_write(ord(e.name), 0xF4)
+        except TypeError:
+            self.ram_write(0, 0xF4)
+            print(e.name)
+
     def run(self):
         """Run the CPU."""
+        if sys.argv[1] == "keyboard.ls8":
+            keyboard.on_press(self.run_keyboard_interrupt)
         start_time = time.time()
 
         while not self.halted:
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= 1:
-                self.registers[self.IS] |= 1  # set bit 0 in the IS
-                self.interrupts_enabled = True
-                start_time = time.time()
+            if sys.argv[1] == "interrupts.ls8":
+                elapsed_time = time.time() - start_time
+                if elapsed_time >= 1:
+                    self.run_timer_interrupt()
+                    start_time = time.time()
 
             if self.interrupts_enabled:
                 masked_interrupts = self.registers[self.IM] & self.registers[self.IS]
@@ -124,16 +142,17 @@ class CPU:
                         # disable further interrupts
                         self.interrupts_enabled = False
                         # clear the bit#0 in the IS register
-                        self.clear_bit()
+                        self.clear_bit(i)
                         # store the state of the cpu
                         self.stack_cpu_state()
                         # set PC to the interrupt handler address
-                        self.PC = self.ram_read(248)
+                        self.PC = self.ram_read(248 + i)
                         break
 
             if self.address == self.registers[self.SP]:
                 print("*** IT'S TIME TO EXIT, THE STACK IS ABOUT TO OVER FLOW ***")
                 return
+
             IR = self.ram_read(self.PC)  # instruction register
             # the number of bytes the instruction has
             num_operands = (IR >> 6) + 1
