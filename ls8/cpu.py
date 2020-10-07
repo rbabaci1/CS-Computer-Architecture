@@ -1,8 +1,9 @@
 """CPU functionality."""
 
 import sys
+import time
 import threading
-from helpers import handle_HALT, handle_ADD, handle_LDI, handle_POP, handle_MUL, handle_JMP, handle_PUSH, handle_PRN, handle_PRA, handle_ST
+from helpers import handle_HALT, handle_ADD, handle_LDI, handle_POP, handle_MUL, handle_JMP, handle_PUSH, handle_PRN, handle_PRA, handle_ST, handle_IRET
 
 LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011
 
@@ -25,6 +26,8 @@ class CPU:
         self.FL = None
         self.IM = 5  # interrupt mask
         self.IS = 6  # interrupt status
+        self.interrupts_enabled = False
+
         self.branch_table = {  # a table to store the helpers for fast lookup
             LDI: handle_LDI,
             PRN: handle_PRN,
@@ -36,7 +39,7 @@ class CPU:
             JMP: handle_JMP,
             ST: handle_ST,
             PRA: handle_PRA,
-            IRET: self.handle_IRET
+            IRET: handle_IRET
         }
 
     def load(self, program):
@@ -79,23 +82,17 @@ class CPU:
 
         print()
 
-    def handle_IRET(self, *args):
-        s_registers = self.ram_read(self.registers[self.SP])
-        self.registers[self.SP] += 1
-        s_FL = self.ram_read(self.registers[self.SP])
-        self.registers[self.SP] += 1
-        s_PC = self.ram_read(self.registers[self.SP])
-        self.registers[self.SP] += 1
+    def ram_read(self, MAR):
+        """should accept the address to read and return the value stored there"""
+        if MAR < len(self.ram):
+            return self.ram[MAR]
 
-        self.registers = s_registers + self.registers[6:]
-        self.FL = s_FL
-        self.PC = s_PC
+    def ram_write(self, MDR, address):
+        """should accept the value to write, and the address to write to"""
+        self.ram[address] = MDR
 
-    def run_timer_interrupt(self):
-        self.registers[self.IS] |= 1  # 1- set bit 0 in the IS
-
-    def clear_bit(self, position):
-        mask = 1 << position
+    def clear_bit(self):
+        mask = 1 << 0
         self.registers[self.IS] &= ~mask
 
     def stack_cpu_state(self):
@@ -109,26 +106,31 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        # run the timer interrupt
-        threading.Timer(1, self.run_timer_interrupt).start()
+        start_time = time.time()
 
         while not self.halted:
-            for i in range(8):
-                if (self.registers[self.IS] >> i) & 1 == 1:
-                    masked_interrupts = self.registers[self.IM] & self.registers[self.IS]
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 1:
+                self.registers[self.IS] |= 1  # set bit 0 in the IS
+                self.interrupts_enabled = True
+                start_time = time.time()
+                print(self.ram)
 
-                    for k in range(8):
-                        interrupt_happend = ((masked_interrupts >> k) & 1) == 1
-                        if interrupt_happend:
-                            # 1- disable further interrupts
+            if self.interrupts_enabled:
+                masked_interrupts = self.registers[self.IM] & self.registers[self.IS]
 
-                            # 2- clear the bit in the IS register
-                            self.clear_bit(i)
-                            # 3- store the state of the cpu
-                            self.stack_cpu_state()
-                            # set PC to the interrupt handler address
-                            self.PC = self.ram_read(248 + i)
-                            break
+                for i in range(8):
+                    interrupt_happend = ((masked_interrupts >> i) & 1) == 1
+                    if interrupt_happend:
+                        # disable further interrupts
+                        self.interrupts_enabled = False
+                        # clear the bit#0 in the IS register
+                        self.clear_bit()
+                        # store the state of the cpu
+                        self.stack_cpu_state()
+                        # set PC to the interrupt handler address
+                        self.PC = self.ram_read(248)
+                        break
 
             if self.address == self.registers[self.SP]:
                 print("*** IT'S TIME TO EXIT, THE STACK IS ABOUT TO OVER FLOW ***")
@@ -139,16 +141,4 @@ class CPU:
             operand_a = self.ram_read(self.PC + 1)
             operand_b = self.ram_read(self.PC + 2)
 
-            self.branch_table[IR](self, operand_a, operand_b)
-
-            if IR != JMP and IR != IRET:
-                self.PC += num_operands
-
-    def ram_read(self, MAR):
-        """should accept the address to read and return the value stored there"""
-        if MAR < len(self.ram):
-            return self.ram[MAR]
-
-    def ram_write(self, MDR, address):
-        """should accept the value to write, and the address to write to"""
-        self.ram[address] = MDR
+            self.branch_table[IR](self, operand_a, operand_b, num_operands)
