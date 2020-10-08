@@ -42,11 +42,9 @@ class CPU:
             hd.LD: hd.handle_LD
         }
 
-    def load(self, program):
+    def load(self, file_name):
         """Load a program into memory."""
-        for instruction in program:
-            self.ram_write(instruction, self.address)
-            self.address += 1
+        hp.write_program_to_ram(self, file_name)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""

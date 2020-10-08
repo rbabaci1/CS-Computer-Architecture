@@ -1,6 +1,18 @@
 import sys
 
 
+def write_program_to_ram(self, file_name):
+    try:
+        with open(f"examples/{file_name}") as fp:
+            for l in fp:
+                binary_string = l.partition("#")[0].strip()
+                if len(binary_string):
+                    self.ram_write(int(binary_string, 2), self.address)
+                    self.address += 1
+    except FileNotFoundError:
+        print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
+
+
 def clear_bit(self, position):
     mask = 1 << position
     self.registers[self.IS] &= ~mask
