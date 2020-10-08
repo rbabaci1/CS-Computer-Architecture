@@ -2,7 +2,7 @@
 import sys
 
 # CPU instructions binary value
-LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011, 0b01010000
 
 
 def handle_LDI(self, *args):
@@ -72,7 +72,6 @@ def handle_PRA(self, *args):
     num_operands = args[2]
     value = self.registers[args[0]]
     print(chr(value)) if value else None
-
     self.PC += num_operands
 
 
@@ -94,5 +93,11 @@ def handle_LD(self, *args):
     reg_a, reg_b, num_operands = args[0], args[1], args[2]
     value_to_load = self.ram_read(self.registers[reg_b])
     self.registers[reg_a] = value_to_load
-
     self.PC += num_operands
+
+
+def handle_CALL(self, *args):
+    reg_n, num_operands,  = args[0], args[2]
+    self.registers[self.SP] -= 1
+    self.ram_write(self.PC + num_operands, self.registers[self.SP])
+    self.PC = self.registers[reg_n]

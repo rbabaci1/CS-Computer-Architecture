@@ -38,7 +38,8 @@ class CPU:
             hd.ST: hd.handle_ST,
             hd.PRA: hd.handle_PRA,
             hd.IRET: hd.handle_IRET,
-            hd.LD: hd.handle_LD
+            hd.LD: hd.handle_LD,
+            hd.CALL: hd.handle_CALL
         }
 
     def load(self, file_name):
