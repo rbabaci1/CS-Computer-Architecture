@@ -17,6 +17,7 @@ class CPU:
         self.registers[7] = 0xF4  # set R7 to a hex value
         self.halted = False  # CPU not halted yet
         self.address = 0
+        self.interrupts_enabled = False
         # internal registers
         self.PC = 0
         self.SP = 7  # stack pointer
@@ -24,7 +25,6 @@ class CPU:
         self.FL = None
         self.IM = 5  # interrupt mask
         self.IS = 6  # interrupt status
-        self.interrupts_enabled = False
 
         self.branch_table = {  # a table to store the helpers for fast lookup
             hd.LDI: hd.handle_LDI,
@@ -47,7 +47,6 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
         if op == "ADD":
             self.registers[reg_a] += self.registers[reg_b]
         elif op == "MUL":

@@ -19,10 +19,6 @@ def clear_bit(self, position):
 
 
 def stack_cpu_state(self):
-    if self.stack_is_empty:
-        self.registers[self.SP] = len(self.ram) - 8
-        self.stack_is_empty = False
-
     for i in [self.PC, self.FL, self.registers[:6]]:
         self.registers[self.SP] -= 1
         self.ram_write(i, self.registers[self.SP])

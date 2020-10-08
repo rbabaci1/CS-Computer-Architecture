@@ -87,6 +87,7 @@ def handle_IRET(self, *args):
     self.registers = s_registers + self.registers[6:]
     self.FL = s_FL
     self.PC = s_PC
+    self.interrupts_enabled = True
 
 
 def handle_LD(self, *args):
