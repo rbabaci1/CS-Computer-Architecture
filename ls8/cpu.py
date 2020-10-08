@@ -17,7 +17,6 @@ class CPU:
         self.registers[7] = 0xF4  # set R7 to a hex value
         self.halted = False  # CPU not halted yet
         self.address = 0
-        self.stack_is_empty = True
         # internal registers
         self.PC = 0
         self.SP = 7  # stack pointer

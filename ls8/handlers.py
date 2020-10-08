@@ -38,11 +38,6 @@ def handle_ADD(self, *args):
 
 
 def handle_PUSH(self, *args):
-    # stack starts at last memory index
-    if self.stack_is_empty:
-        self.registers[self.SP] = len(self.ram) - 8
-        self.stack_is_empty = False
-
     self.registers[self.SP] -= 1
     valueToPush, num_operands = self.registers[args[0]], args[2]
     self.ram_write(valueToPush, self.registers[self.SP])
