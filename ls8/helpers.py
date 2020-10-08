@@ -32,7 +32,6 @@ def run_timer_interrupt(self):
 def run_keyboard_interrupt(self, e):
     self.registers[self.IS] |= 2
     self.interrupts_enabled = True
-
     try:
         self.ram_write(ord(e.name), 0xF4)
     except TypeError:
