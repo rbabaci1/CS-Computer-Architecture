@@ -17,7 +17,7 @@ class CPU:
         self.registers[7] = 0xF4  # set R7 to a hex value
         self.halted = False  # CPU not halted yet
         self.address = 0
-        self.interrupts_enabled = False
+        self.interrupts_enabled = True
         # internal registers
         self.PC = 0
         self.SP = 7  # stack pointer
@@ -91,16 +91,14 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        if sys.argv[1] == "keyboard.ls8":
-            keyboard.on_press(self.handle_keyboard_interrupt)
+        keyboard.on_press(self.handle_keyboard_interrupt)
 
         start_time = time.time()
         while not self.halted:
-            if sys.argv[1] == "interrupts.ls8":
-                elapsed_time = time.time() - start_time
-                if elapsed_time >= 1:
-                    hp.run_timer_interrupt(self)
-                    start_time = time.time()
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 1:
+                hp.run_timer_interrupt(self)
+                start_time = time.time()
 
             if self.interrupts_enabled:
                 masked_interrupts = self.registers[self.IM] & self.registers[self.IS]
@@ -117,10 +115,9 @@ class CPU:
                         self.PC = self.ram_read(248 + i)
                         break
 
-            elif self.address == self.registers[self.SP]:
-                print("\n*** THE STACK IS FULL. EXITING TO AVOID OVERFLOWING ***\n")
+            if self.address == self.registers[self.SP]:
+                print("\n*** THE STACK IS FULL. EXITING... TO AVOID OVERFLOWING ***\n")
                 return
-
             else:   # keep executing instructions as usual
                 IR = self.ram_read(self.PC)  # instruction register
                 # the number of bytes the instruction has

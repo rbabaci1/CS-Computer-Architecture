@@ -1,6 +1,3 @@
-import sys
-
-
 def write_program_to_ram(self, file_name):
     try:
         with open(f"examples/{file_name}") as fp:
@@ -26,12 +23,10 @@ def stack_cpu_state(self):
 
 def run_timer_interrupt(self):
     self.registers[self.IS] |= 1  # set bit 0 in the IS
-    self.interrupts_enabled = True
 
 
 def run_keyboard_interrupt(self, e):
     self.registers[self.IS] |= 2
-    self.interrupts_enabled = True
     try:
         self.ram_write(ord(e.name), 0xF4)
     except TypeError:
