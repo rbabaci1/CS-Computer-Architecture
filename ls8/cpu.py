@@ -65,27 +65,6 @@ class CPU:
         """should accept the value to write, and the address to write to"""
         self.ram[address] = MDR
 
-    def trace(self):
-        """
-        Handy function to print out the CPU state. You might want to call this
-        from run() if you need help debugging.
-        """
-        print(
-            f"TRACE: %02X | %02X %02X %02X |"
-            % (
-                self.pc,
-                # self.fl,
-                # self.ie,
-                self.ram_read(self.pc),
-                self.ram_read(self.pc + 1),
-                self.ram_read(self.pc + 2),
-            ),
-            end="",
-        )
-        for i in range(8):
-            print(" %02X" % self.reg[i], end="")
-        print()
-
     def handle_keyboard_interrupt(self, k_e):
         hp.run_keyboard_interrupt(self, k_e)
 
