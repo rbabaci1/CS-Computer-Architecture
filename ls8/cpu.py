@@ -45,7 +45,8 @@ class CPU:
             hd.JEQ: hd.handle_JEQ,
             hd.JNE: hd.handle_JNE,
             hd.AND: hd.handle_AND,
-            hd.OR: hd.handle_OR
+            hd.OR: hd.handle_OR,
+            hd.XOR: hd.handle_XOR
         }
 
     def load(self, file_name):
@@ -64,6 +65,8 @@ class CPU:
             self.registers[reg_a] = (self.registers[reg_a] & self.registers[reg_b])
         elif op == "OR":
             self.registers[reg_a] = (self.registers[reg_a] | self.registers[reg_b])
+        elif op == "XOR":
+            self.registers[reg_a] = (self.registers[reg_a] ^ self.registers[reg_b])
         else:
             raise Exception("Unsupported ALU operation")
 
