@@ -42,7 +42,8 @@ class CPU:
             hd.CALL: hd.handle_CALL,
             hd.RET: hd.handle_RET,
             hd.CMP: hd.handle_CMP,
-            hd.JEQ: hd.handle_JEQ
+            hd.JEQ: hd.handle_JEQ,
+            hd.JNE: hd.handle_JNE
         }
 
     def load(self, file_name):

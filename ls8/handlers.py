@@ -1,7 +1,7 @@
 
 import sys
 # CPU instructions binary value
-LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET, CMP, JEQ = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011, 0b01010000, 0b00010001, 0b10100111, 0b01010101
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET, CMP, JEQ, JNE = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011, 0b01010000, 0b00010001, 0b10100111, 0b01010101, 0b01010110
 
 
 def handle_LDI(self, *args):
@@ -115,4 +115,12 @@ def handle_CMP(self, *args):
     
 def handle_JEQ(self, *args):
     if self.FL & 1 == 1:
-        handle_JMP(self, args)
+        handle_JMP(self, *args)
+    else:
+        self.PC += args[2]
+
+def handle_JNE(self, *args):
+    if self.FL & 1 == 0:
+        handle_JMP(self, *args)
+    else:
+        self.PC += args[2]
