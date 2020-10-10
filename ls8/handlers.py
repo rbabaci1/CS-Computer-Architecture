@@ -1,5 +1,5 @@
-
 import sys
+
 # CPU instructions binary value
 LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET, CMP, JEQ, JNE, AND, OR, XOR, NOT, SHL, SHR, MOD, ADDI, INC, DEC = 130, 71, 1, 162, 160, 69, 70, 84, 132, 72, 19, 131, 80, 17, 167, 85, 86, 168, 170, 171, 105, 172, 173, 164, 165, 101, 102
 
