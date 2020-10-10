@@ -49,7 +49,8 @@ class CPU:
             hd.XOR: hd.handle_XOR,
             hd.NOT: hd.handle_NOT,
             hd.SHL: hd.handle_SHL,
-            hd.SHR: hd.handle_SHR
+            hd.SHR: hd.handle_SHR,
+            hd.MOD: hd.handle_MOD
         }
 
     def load(self, file_name):
@@ -76,6 +77,12 @@ class CPU:
             self.registers[reg_a] = (self.registers[reg_a] << self.registers[reg_b])
         elif op == "SHR":
             self.registers[reg_a] = (self.registers[reg_a] >> self.registers[reg_b])
+        elif op == "MOD":
+            if self.registers[reg_b] == 0:
+                print("Can't perform a division over 0, second value can't be 0.")
+                self.halted = True
+            else:
+                self.registers[reg_a] = (self.registers[reg_a] % self.registers[reg_b])
         else:
             raise Exception("Unsupported ALU operation")
 
