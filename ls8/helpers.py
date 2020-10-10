@@ -1,84 +1,34 @@
-import time
+def write_program_to_ram(self, file_name):
+    try:
+        with open(f"examples/{file_name}") as fp:
+            for l in fp:
+                binary_string = l.partition("#")[0].strip()
+                if len(binary_string):
+                    self.ram_write(int(binary_string, 2), self.address)
+                    self.address += 1
+    except FileNotFoundError:
+        print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
 
 
-def handle_LDI(self, *args):
-    reg_num, value, num_operands = args[0], args[1], args[2]
-    self.registers[reg_num] = value
-    self.PC += num_operands
+def clear_bit(self, position):
+    mask = 1 << position
+    self.registers[self.IS] &= ~mask
 
 
-def handle_PRN(self, *args):
-    reg_num, num_operands = args[0], args[2]
-    print(" -------------------")
-    print(f"| Register_{reg_num} |   {self.registers[reg_num]}  |")
-    print(" -------------------")
-    self.PC += num_operands
+def stack_cpu_state(self):
+    for i in [self.PC, self.FL, self.registers[:6]]:
+        self.registers[self.SP] -= 1
+        self.ram_write(i, self.registers[self.SP])
 
 
-def handle_HALT(self, *args):
-    self.halted, num_operands = True, args[2]
-    print("HALT")
-    self.PC += num_operands
+def run_timer_interrupt(self):
+    self.registers[self.IS] |= 1  # set bit 0 in the IS
 
 
-def handle_MUL(self, *args):
-    reg_a, reg_b, num_operands = args[0], args[1], args[2]
-    self.alu("MUL", reg_a, reg_b)
-    self.PC += num_operands
-
-
-def handle_ADD(self, *args):
-    reg_a, reg_b, num_operands = args[0], args[1], args[2]
-    self.alu("ADD", reg_a, reg_b)
-    self.PC += num_operands
-
-
-def handle_PUSH(self, *args):
-    # stack starts at last memory index
-    if self.stack_is_empty:
-        self.registers[self.SP] = len(self.ram) - 8
-        self.stack_is_empty = False
-
-    self.registers[self.SP] -= 1
-    valueToPush, num_operands = self.registers[args[0]], args[2]
-    self.ram_write(valueToPush, self.registers[self.SP])
-    self.PC += num_operands
-
-
-def handle_POP(self, *args):
-    reg_to_store_in, num_operands = args[0], args[2]
-    value_to_store = self.ram_read(self.registers[self.SP])
-    self.registers[reg_to_store_in] = value_to_store
-    self.registers[self.SP] += 1
-    self.PC += num_operands
-
-
-def handle_JMP(self, *args):
-    reg_to_jump_to = self.registers[args[0]]
-    self.PC = reg_to_jump_to
-
-
-def handle_ST(self, *args):
-    value_to_store, num_operands = self.registers[args[1]], args[2]
-    address_to_store_at = self.registers[args[0]]
-    self.ram_write(value_to_store, address_to_store_at)
-    self.PC += num_operands
-
-
-def handle_PRA(self, *args):
-    num_operands = args[2]
-    print(chr(self.registers[args[0]]))
-    self.PC += num_operands
-
-
-def handle_IRET(self, *args):
-    s_registers = self.ram_read(self.registers[self.SP])
-    self.registers[self.SP] += 1
-    s_FL = self.ram_read(self.registers[self.SP])
-    self.registers[self.SP] += 1
-    s_PC = self.ram_read(self.registers[self.SP])
-    self.registers[self.SP] += 1
-
-    self.registers = s_registers + self.registers[6:]
-    self.FL = s_FL
-    self.PC = s_PC
+def run_keyboard_interrupt(self, e):
+    self.registers[self.IS] |= 2
+    try:
+        self.ram_write(ord(e.name), 0xF4)
+    except TypeError:
+        self.ram_write(0, 0xF4)
+        print(e.name)

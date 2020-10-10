@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
-
 """Main."""
 
 import sys
 from cpu import CPU
 
 
-def generate_program(file_name):
-    try:
-        with open(f"examples/{file_name}") as fp:
-            program = []
-            for l in fp:
-                binary_string = l.partition("#")[0].strip()
-                if len(binary_string):
-                    program.append(int(binary_string, 2))
-            return program
-    except FileNotFoundError:
-        print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
+# def generate_program(file_name):
+#     try:
+#         with open(f"examples/{file_name}") as fp:
+#             program = []
+#             for l in fp:
+#                 binary_string = l.partition("#")[0].strip()
+#                 if len(binary_string):
+#                     program.append(int(binary_string, 2))
+#             return program
+#     except FileNotFoundError:
+#         print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
 
 
 def main(argv):
@@ -29,11 +28,7 @@ def main(argv):
 
     cpu = CPU()
 
-    program = generate_program(argv[1])
-    if not program:
-        return 1
-
-    cpu.load(program)
+    cpu.load(argv[1])
     cpu.run()
 
 
