@@ -1,5 +1,5 @@
 # CPU instructions binary value
-LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011, 0b01010000, 0b00010001
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET, CMP = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011, 0b01010000, 0b00010001, 0b10100111
 
 
 def handle_LDI(self, *args):
@@ -105,3 +105,8 @@ def handle_CALL(self, *args):
 def handle_RET(self, *args):
     self.PC = self.ram_read(self.registers[self.SP])
     self.registers[self.SP] += 1
+
+def handle_CMP(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("CMP", reg_a, reg_b)
+    self.PC += num_operands

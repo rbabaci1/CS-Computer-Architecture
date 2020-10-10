@@ -22,7 +22,7 @@ class CPU:
         self.PC = 0
         self.SP = 7  # stack pointer
         self.IR = None
-        self.FL = None
+        self.FL = 0
         self.IM = 5  # interrupt mask
         self.IS = 6  # interrupt status
 
@@ -53,6 +53,13 @@ class CPU:
             self.registers[reg_a] += self.registers[reg_b]
         elif op == "MUL":
             self.registers[reg_a] *= self.registers[reg_b]
+        elif op == "CMP":
+            if reg_a == reg_b:
+                self.FL = hp.set_kth_bit(self.FL, 0)
+            elif reg_a > reg_b:
+                self.FL = hp.set_kth_bit(self.FL, 1)
+            else:
+                self.FL = hp.set_kth_bit(self.FL, 2)
         else:
             raise Exception("Unsupported ALU operation")
 
