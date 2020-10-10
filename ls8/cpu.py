@@ -43,7 +43,8 @@ class CPU:
             hd.RET: hd.handle_RET,
             hd.CMP: hd.handle_CMP,
             hd.JEQ: hd.handle_JEQ,
-            hd.JNE: hd.handle_JNE
+            hd.JNE: hd.handle_JNE,
+            hd.AND: hd.handle_AND
         }
 
     def load(self, file_name):
@@ -58,6 +59,8 @@ class CPU:
             self.registers[reg_a] *= self.registers[reg_b]
         elif op == "CMP":
             hp.set_FL_kth_bit(self, reg_a, reg_b)
+        elif op == "AND":
+            self.registers[reg_a] = self.registers[reg_a] & self.registers[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
