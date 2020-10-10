@@ -46,14 +46,16 @@ class CPU:
             hd.JNE: hd.handle_JNE,
             hd.AND: hd.handle_AND,
             hd.OR: hd.handle_OR,
-            hd.XOR: hd.handle_XOR
+            hd.XOR: hd.handle_XOR,
+            hd.NOT: hd.handle_NOT,
+            hd.SHL: hd.handle_SHL
         }
 
     def load(self, file_name):
         """Load a program into memory."""
         hp.write_program_to_ram(self, file_name)
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, op, reg_a, reg_b=None):
         """ALU operations."""
         if op == "ADD":
             self.registers[reg_a] += self.registers[reg_b]
@@ -67,6 +69,10 @@ class CPU:
             self.registers[reg_a] = (self.registers[reg_a] | self.registers[reg_b])
         elif op == "XOR":
             self.registers[reg_a] = (self.registers[reg_a] ^ self.registers[reg_b])
+        elif op == "NOT":
+            self.registers[reg_a] = (~self.registers[reg_a])
+        elif op == "SHL":
+            self.registers[reg_a] = (self.registers[reg_a] << self.registers[reg_b])
         else:
             raise Exception("Unsupported ALU operation")
 

@@ -1,7 +1,7 @@
 
 import sys
 # CPU instructions binary value
-LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET, CMP, JEQ, JNE, AND, OR, XOR = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011, 0b01010000, 0b00010001, 0b10100111, 0b01010101, 0b01010110, 0b10101000, 0b10101010, 0b10101011
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET, CMP, JEQ, JNE, AND, OR, XOR, NOT, SHL = 130, 71, 1, 162, 160, 69, 70, 84, 132, 72, 19, 131, 80, 17, 167, 85, 86, 168, 170, 171, 105, 172 
 
 
 def handle_LDI(self, *args):
@@ -138,4 +138,14 @@ def handle_OR(self, *args):
 def handle_XOR(self, *args):
     reg_a, reg_b, num_operands = args[0], args[1], args[2]
     self.alu("XOR", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_NOT(self, *args):
+    reg, num_operands = args[0], args[2]
+    self.alu("NOT", reg)
+    self.PC += num_operands
+    
+def handle_SHL(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("SHL", reg_a, reg_b)
     self.PC += num_operands
