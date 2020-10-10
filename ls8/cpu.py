@@ -2,21 +2,28 @@
 
 import sys
 
+LDI, PRN, HALT, MUL = 0b10000010, 0b01000111, 0b00000001, 0b10100010
+
 
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        # initialize the ram with 256 bytes
-        self.ram = [0] * 256
-        # initialize 8 registers
-        self.registers = [0] * 8
-
+        self.ram = [0] * 256  # initialize the ram with 256 bytes
+        self.registers = [0] * 8  # initialize 8 registers
+        self.registers[7] = 0xF4  # set R7 to a hex value
+        self.halted = False  # CPU not halted yet
         # internal registers
         self.PC = 0
         self.IR = None
         self.FL = None
+        self.branch_table = {  # a table to store the helpers for fast lookup
+            LDI: self.handle_LDI,
+            PRN: self.handle_PRN,
+            HALT: self.handle_HALT,
+            MUL: self.handle_MUL,
+        }
 
     def isKthBitSet(self, n, k):
         if n & (1 << (k - 1)):
@@ -27,21 +34,21 @@ class CPU:
         return int(opcode[2:])
 
     def validate_arguments(self, args):
-        if len(args) < 2:
-            print("\t*******************************************")
-            print(f"PLEASE SPECIFY THE FILE NAME TO LOAD AS THE SECOND ARGUMENT")
-            print("\t*******************************************")
+        if len(args) != 2:
+            print(
+                f"*** PLEASE SPECIFY THE FILE NAME TO LOAD AS THE SECOND ARGUMENT ***"
+            )
             sys.exit(1)
-        elif len(args) >= 2:
-            file_name = args[1]
-            if file_name[:9] != "examples/":
-                print("\t*******************************************")
-                print(f"\t   PLEASE SPECIFY THE CORRECT FOLDER NAME")
-                print("\t*******************************************")
-                sys.exit(1)
         return args[1]
 
-    def generate_values(self, file_lines):
+    def generate_values(self, file_name):
+        try:
+            with open(f"examples/{file_name}") as f:
+                file_lines = f.readlines()
+        except FileNotFoundError:
+            print(f"*** THE SPECIFIED FILE NAME DOESN'T EXIST ***")
+            sys.exit(1)
+
         values = []
         for l in file_lines:
             binary_string = l.partition("#")[0].strip()
@@ -54,13 +61,7 @@ class CPU:
 
         address = 0
         file_name = self.validate_arguments(sys.argv)
-
-        with open(file_name) as f:
-            lines = f.readlines()
-
-        program = self.generate_values(lines)
-        print(program)
-        sys.exit(1)
+        program = self.generate_values(file_name)
 
         for instruction in program:
             self.ram[address] = instruction
@@ -70,8 +71,10 @@ class CPU:
         """ALU operations."""
 
         if op == "ADD":
-            self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
+            self.registers[reg_a] += self.registers[reg_b]
+        elif op == "MUL":
+            result = self.registers[reg_a] * self.registers[reg_b]
+            self.registers[reg_a] = result
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -99,36 +102,41 @@ class CPU:
 
         print()
 
+    def handle_LDI(self, *args):
+        reg_num, value = args[0], args[1]
+        self.registers[reg_num] = value
+        print("LDI")
+
+    def handle_PRN(self, *args):
+        reg_num = args[0]
+        print(f"Register-{reg_num} has value of {self.registers[reg_num]}.")
+
+    def handle_HALT(self, *args):
+        self.halted = True
+        print("HALT")
+
+    def handle_MUL(self, *args):
+        reg_a, reg_b = args[0], args[1]
+        self.alu("MUL", reg_a, reg_b)
+
     def run(self):
         """Run the CPU."""
-        LDI, PRN, HALT, running = 0b0010, 0b0111, 0b0001, True
 
-        while running:
-            IR = self.ram_read(self.PC)  # instruction register
-            II = (1 << 4) - 1 & IR  # instruction identifier
-            num_operands = IR >> 6  # the number of bytes the instruction has
+        while not self.halted:
             # isALU = self.isKthBitSet(IR, 6)
             # setsPC = self.isKthBitSet(IR, 5)
+            IR = self.ram_read(self.PC)  # instruction register
+            num_operands = (IR >> 6) + 1  # the number of bytes the instruction has
+            operand_a = self.ram_read(self.PC + 1)
+            operand_b = self.ram_read(self.PC + 2)
 
-            if II == LDI:  # LDI, set the specified register to a specific value
-                reg_num = self.ram_read(self.PC + 1)
-                value = self.ram_read(self.PC + 2)
-                self.registers[reg_num] = value
-                self.PC += num_operands + 1
-                print("LDI")
-
-            elif II == PRN:  # PRN, Print numeric value stored in a given register
-                reg_num = self.ram_read(self.PC + 1)
-                print(f"R{reg_num} has value of {self.registers[reg_num]}.")
-                self.PC += num_operands + 1
-
-            elif II == HALT:  # HALT
-                running = False
-                print("HALT")
+            self.branch_table[IR](operand_a, operand_b)
+            self.PC += num_operands
 
     def ram_read(self, MAR):
         """should accept the address to read and return the value stored there"""
-        return self.ram[MAR]
+        if MAR < len(self.ram):
+            return self.ram[MAR]
 
     def ram_write(self, MDR, address):
         """should accept the value to write, and the address to write to"""
