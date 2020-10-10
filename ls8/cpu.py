@@ -48,7 +48,8 @@ class CPU:
             hd.OR: hd.handle_OR,
             hd.XOR: hd.handle_XOR,
             hd.NOT: hd.handle_NOT,
-            hd.SHL: hd.handle_SHL
+            hd.SHL: hd.handle_SHL,
+            hd.SHR: hd.handle_SHR
         }
 
     def load(self, file_name):
@@ -73,6 +74,8 @@ class CPU:
             self.registers[reg_a] = (~self.registers[reg_a])
         elif op == "SHL":
             self.registers[reg_a] = (self.registers[reg_a] << self.registers[reg_b])
+        elif op == "SHR":
+            self.registers[reg_a] = (self.registers[reg_a] >> self.registers[reg_b])
         else:
             raise Exception("Unsupported ALU operation")
 
