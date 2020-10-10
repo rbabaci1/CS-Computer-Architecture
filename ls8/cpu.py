@@ -50,7 +50,8 @@ class CPU:
             hd.NOT: hd.handle_NOT,
             hd.SHL: hd.handle_SHL,
             hd.SHR: hd.handle_SHR,
-            hd.MOD: hd.handle_MOD
+            hd.MOD: hd.handle_MOD,
+            hd.ADDI: hd.handle_ADDI
         }
 
     def load(self, file_name):
@@ -83,6 +84,8 @@ class CPU:
                 self.halted = True
             else:
                 self.registers[reg_a] = (self.registers[reg_a] % self.registers[reg_b])
+        elif op == "ADDI":
+            self.registers[reg_a] += reg_b
         else:
             raise Exception("Unsupported ALU operation")
 
