@@ -57,12 +57,7 @@ class CPU:
         elif op == "MUL":
             self.registers[reg_a] *= self.registers[reg_b]
         elif op == "CMP":
-            if self.registers[reg_a] == self.registers[reg_b]:
-                self.FL = hp.set_kth_bit(self.FL, 0)
-            elif self.registers[reg_a] > self.registers[reg_b]:
-                self.FL = hp.set_kth_bit(self.FL, 1)
-            else:
-                self.FL = hp.set_kth_bit(self.FL, 2)
+            hp.set_FL_kth_bit(self, reg_a, reg_b)
         else:
             raise Exception("Unsupported ALU operation")
 

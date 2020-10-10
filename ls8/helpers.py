@@ -13,8 +13,13 @@ def clear_bit(self, position):
     mask = 1 << position
     self.registers[self.IS] &= ~mask
     
-def set_kth_bit(n, position):
-    return ((1 << position) | n)
+def set_FL_kth_bit(self, reg_a, reg_b):
+    if self.registers[reg_a] == self.registers[reg_b]:
+        self.FL = ((1 << 0) | self.FL)
+    elif self.registers[reg_a] > self.registers[reg_b]:
+        self.FL = ((1 << 1) | self.FL)
+    else:
+        self.FL = ((1 << 2) | self.FL)
 
 def stack_cpu_state(self):
     for i in [self.PC, self.FL, self.registers[:6]]:
