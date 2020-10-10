@@ -40,7 +40,9 @@ class CPU:
             hd.IRET: hd.handle_IRET,
             hd.LD: hd.handle_LD,
             hd.CALL: hd.handle_CALL,
-            hd.RET: hd.handle_RET
+            hd.RET: hd.handle_RET,
+            hd.CMP: hd.handle_CMP,
+            hd.JEQ: hd.handle_JEQ
         }
 
     def load(self, file_name):
@@ -54,9 +56,9 @@ class CPU:
         elif op == "MUL":
             self.registers[reg_a] *= self.registers[reg_b]
         elif op == "CMP":
-            if reg_a == reg_b:
+            if self.registers[reg_a] == self.registers[reg_b]:
                 self.FL = hp.set_kth_bit(self.FL, 0)
-            elif reg_a > reg_b:
+            elif self.registers[reg_a] > self.registers[reg_b]:
                 self.FL = hp.set_kth_bit(self.FL, 1)
             else:
                 self.FL = hp.set_kth_bit(self.FL, 2)
