@@ -22,7 +22,7 @@ class CPU:
         self.PC = 0
         self.SP = 7  # stack pointer
         self.IR = None
-        self.FL = None
+        self.FL = 0
         self.IM = 5  # interrupt mask
         self.IS = 6  # interrupt status
 
@@ -40,19 +40,58 @@ class CPU:
             hd.IRET: hd.handle_IRET,
             hd.LD: hd.handle_LD,
             hd.CALL: hd.handle_CALL,
-            hd.RET: hd.handle_RET
+            hd.RET: hd.handle_RET,
+            hd.CMP: hd.handle_CMP,
+            hd.JEQ: hd.handle_JEQ,
+            hd.JNE: hd.handle_JNE,
+            hd.AND: hd.handle_AND,
+            hd.OR: hd.handle_OR,
+            hd.XOR: hd.handle_XOR,
+            hd.NOT: hd.handle_NOT,
+            hd.SHL: hd.handle_SHL,
+            hd.SHR: hd.handle_SHR,
+            hd.MOD: hd.handle_MOD,
+            hd.ADDI: hd.handle_ADDI,
+            hd.INC: hd.handle_INC,
+            hd.DEC: hd.handle_DEC
         }
 
     def load(self, file_name):
         """Load a program into memory."""
         hp.write_program_to_ram(self, file_name)
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, op, reg_a, reg_b=None):
         """ALU operations."""
         if op == "ADD":
             self.registers[reg_a] += self.registers[reg_b]
         elif op == "MUL":
             self.registers[reg_a] *= self.registers[reg_b]
+        elif op == "CMP":
+            hp.set_FL_kth_bit(self, reg_a, reg_b)
+        elif op == "AND":
+            self.registers[reg_a] = (self.registers[reg_a] & self.registers[reg_b])
+        elif op == "OR":
+            self.registers[reg_a] = (self.registers[reg_a] | self.registers[reg_b])
+        elif op == "XOR":
+            self.registers[reg_a] = (self.registers[reg_a] ^ self.registers[reg_b])
+        elif op == "NOT":
+            self.registers[reg_a] = (~self.registers[reg_a])
+        elif op == "SHL":
+            self.registers[reg_a] = (self.registers[reg_a] << self.registers[reg_b])
+        elif op == "SHR":
+            self.registers[reg_a] = (self.registers[reg_a] >> self.registers[reg_b])
+        elif op == "MOD":
+            if self.registers[reg_b] == 0:
+                print("Can't perform a division over 0, second value can't be 0.")
+                self.halted = True
+            else:
+                self.registers[reg_a] = (self.registers[reg_a] % self.registers[reg_b])
+        elif op == "ADDI":
+            self.registers[reg_a] += reg_b
+        elif op == "INC":
+            self.registers[reg_a] += 1
+        elif op == "DEC":
+            self.registers[reg_a] -= 1
         else:
             raise Exception("Unsupported ALU operation")
 

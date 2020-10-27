@@ -1,5 +1,7 @@
+import sys
+
 # CPU instructions binary value
-LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET = 0b10000010, 0b01000111, 0b00000001, 0b10100010, 0b10100000, 0b01000101, 0b01000110, 0b01010100, 0b10000100, 0b01001000, 0b00010011, 0b10000011, 0b01010000, 0b00010001
+LDI, PRN, HALT, MUL, ADD, PUSH, POP, JMP, ST, PRA, IRET, LD, CALL, RET, CMP, JEQ, JNE, AND, OR, XOR, NOT, SHL, SHR, MOD, ADDI, INC, DEC = 130, 71, 1, 162, 160, 69, 70, 84, 132, 72, 19, 131, 80, 17, 167, 85, 86, 168, 170, 171, 105, 172, 173, 164, 165, 101, 102
 
 
 def handle_LDI(self, *args):
@@ -105,3 +107,70 @@ def handle_CALL(self, *args):
 def handle_RET(self, *args):
     self.PC = self.ram_read(self.registers[self.SP])
     self.registers[self.SP] += 1
+
+def handle_CMP(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("CMP", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_JEQ(self, *args):
+    if self.FL & 1 == 1:
+        handle_JMP(self, *args)
+    else:
+        self.PC += args[2]
+
+def handle_JNE(self, *args):
+    if self.FL & 1 == 0:
+        handle_JMP(self, *args)
+    else:
+        self.PC += args[2]
+        
+def handle_AND(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("AND", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_OR(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("OR", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_XOR(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("XOR", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_NOT(self, *args):
+    reg, num_operands = args[0], args[2]
+    self.alu("NOT", reg)
+    self.PC += num_operands
+    
+def handle_SHL(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("SHL", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_SHR(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("SHR", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_MOD(self, *args):
+    reg_a, reg_b, num_operands = args[0], args[1], args[2]
+    self.alu("MOD", reg_a, reg_b)
+    self.PC += num_operands
+    
+def handle_ADDI(self, *args):
+    reg, value, num_operands = args[0], args[1], args[2]
+    self.alu("ADDI", reg, value)
+    self.PC += num_operands
+    
+def handle_INC(self, *args):
+    reg, num_operands = args[0], args[2]
+    self.alu("INC", reg)
+    self.PC += num_operands
+
+def handle_DEC(self, *args):
+    reg, num_operands = args[0], args[2]
+    self.alu("DEC", reg)
+    self.PC += num_operands
